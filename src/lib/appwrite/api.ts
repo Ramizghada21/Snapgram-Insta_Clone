@@ -224,8 +224,12 @@ export async function searchPosts(searchTerm: string) {
   }
 }
 
-export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
-  const queries: any[] = [Query.orderDesc("$updatedAt"), Query.limit(9)];
+export async function getInfinitePosts({
+  pageParam,
+}: {
+  pageParam?: number | null;
+}): Promise<any> {
+  const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(9)];
 
   if (pageParam) {
     queries.push(Query.cursorAfter(pageParam.toString()));
@@ -238,14 +242,16 @@ export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
       queries
     );
 
-    if (!posts) throw Error;
+    if (!posts) {
+      throw new Error('Failed to fetch posts.');
+    }
 
     return posts;
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching posts:', error);
+    throw error; // Re-throw error for handling in the calling function
   }
 }
-
 // ============================== GET POST BY ID
 export async function getPostById(postId?: string) {
   if (!postId) throw Error;
